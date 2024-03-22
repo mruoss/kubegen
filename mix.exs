@@ -37,6 +37,7 @@ defmodule Kubegen.MixProject do
       {:dialyxir, "~> 1.4.0", only: [:dev, :test], runtime: false},
 
       # Test deps
+      {:ex_doc, "~> 0.31", only: :dev, runtime: false},
       {:excoveralls, "~> 0.18", only: :test},
     ]
   end
