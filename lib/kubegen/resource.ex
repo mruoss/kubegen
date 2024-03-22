@@ -1,14 +1,14 @@
 defmodule Kubegen.Resource do
   alias Kubegen.Utils
 
-  def generate(resources, module_prefix) do
-    {discovery, _} = Code.eval_file("build/discovery.ex")
+  @discovery elem(Code.eval_file("build/discovery.ex"), 0)
 
+  def generate(resources, module_prefix) do
     for resource <- resources,
-        definition = discovery[resource],
-        {module, api_version} = derive_module_and_api_version(module_prefix, resource),
-        resource <- generate_resource(definition, module, api_version) do
-      resource
+        {gvk, definition} <- get_definitions(resource),
+        {module, api_version} = derive_module_and_api_version(module_prefix, gvk),
+        generated_resource <- generate_resource(definition, module, api_version) do
+      generated_resource
     end
   end
 
@@ -104,6 +104,73 @@ defmodule Kubegen.Resource do
       end
 
     {api_module, ast}
+  end
+
+  defp get_definitions(resource) do
+    cond do
+      @discovery[resource] ->
+        [{resource, @discovery[resource]}]
+
+      File.exists?(resource) ->
+        resource
+        |> YamlElixir.read_all_from_file!()
+        |> Enum.flat_map(&crd_to_gvk_and_discovery/1)
+
+      :otherwise ->
+        raise "Resource #{resource} was not found."
+    end
+  end
+
+  defp crd_to_gvk_and_discovery(crd) do
+    %{
+      "spec" => %{
+        "names" => %{"plural" => name, "kind" => kind},
+        "versions" => versions,
+        "scope" => scope,
+        "group" => group
+      }
+    } = crd
+
+    namespaced = scope === "namespaced"
+
+    discovery = %{
+      "name" => name,
+      "namespaced" => namespaced,
+      "verbs" => [
+        "create",
+        "get",
+        "list",
+        "delete",
+        "deletecollection",
+        "update",
+        "patch",
+        "watch"
+      ]
+    }
+
+    for version <- versions do
+      subresources = Map.keys(version["subresources"] || %{})
+
+      subresource_definitions =
+        [
+          "status" in subresources &&
+            %{
+              "name" => "#{name}/status",
+              "namespaced" => namespaced,
+              "verbs" => ["get", "patch", "update"]
+            },
+          "scale" in subresources &&
+            %{
+              "name" => "#{name}/scale",
+              "namespaced" => namespaced,
+              "verbs" => ["get", "patch", "update"]
+            }
+        ]
+        |> Enum.filter(& &1)
+
+      {"#{group}/#{version["name"]}/#{kind}",
+       Map.put(discovery, "subresources", subresource_definitions)}
+    end
   end
 
   defp derive_module_and_api_version(module_prefix, resource) do
