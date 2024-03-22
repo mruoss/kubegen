@@ -80,7 +80,7 @@ defmodule Kubegen.Resource do
       quote do
         step Kubeconf.ENV
         step Kubeconf.File, path: ".kube/config", relative_to_home?: true
-        step Kubeconf.Token
+        step Kubeconf.ServiceAccount
       end
       |> Utils.flatten_blocks()
 
