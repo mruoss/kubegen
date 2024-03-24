@@ -11,9 +11,9 @@ defmodule Kubegen.API.Namespaced do
       @doc """
       Create a resource of kind `#{unquote(kind)}` in apiVersion `#{unquote(api_version)}`.
       """
-      @spec create(resource :: map()) :: Kubereq.Client.Req.response()
+      @spec create(resource :: map()) :: Kubereq.response()
       def create(resource) do
-        Client.create(req(), @resource_list_path, resource)
+        Kubereq.create(req(), resource)
       end
     end
   end
@@ -24,10 +24,10 @@ defmodule Kubegen.API.Namespaced do
       Get the resource of kind `#{unquote(kind)}` in apiVersion `#{unquote(api_version)}` by `name`.
       """
 
-      @spec get(namespace :: Client.namespace(), name :: String.t()) ::
-              Kubereq.Client.Req.response()
+      @spec get(namespace :: Kubereq.namespace(), name :: String.t()) ::
+              Kubereq.response()
       def get(namespace, name),
-        do: Client.get(req(), @resource_path, namespace, name)
+        do: Kubereq.get(req(), namespace, name)
 
       @doc """
       Wait until the given `callback` resolves to true for a resource of kind
@@ -46,21 +46,20 @@ defmodule Kubegen.API.Namespaced do
 
       """
       @spec wait_until(
-              namespace :: Client.namespace(),
+              namespace :: Kubereq.namespace(),
               name :: String.t(),
-              callback :: Client.wait_until_callback()
+              callback :: Kubereq.wait_until_callback()
             ) :: :ok | {:error, timeout}
       @spec wait_until(
-              namespace :: Client.namespace(),
+              namespace :: Kubereq.namespace(),
               name :: String.t(),
-              callback :: Client.wait_until_callback(),
+              callback :: Kubereq.wait_until_callback(),
               timeout :: integer()
             ) :: :ok | {:error, timeout}
       def wait_until(namespace, name, callback, timeout \\ 10_000),
         do:
-          Client.wait_until(
+          Kubereq.wait_until(
             req(),
-            @resource_list_path,
             namespace,
             name,
             callback,
@@ -74,21 +73,21 @@ defmodule Kubegen.API.Namespaced do
       @doc """
       List resources of kind `#{unquote(kind)}` in apiVersion `#{unquote(api_version)}` in all namespaces.
       """
-      @spec list() :: Kubereq.Client.Req.response()
+      @spec list() :: Kubereq.response()
       def list(), do: list(nil, [])
 
-      @spec list(opts :: Keyword.t()) :: Kubereq.Client.Req.response()
+      @spec list(opts :: Keyword.t()) :: Kubereq.response()
       def list(opts) when is_list(opts), do: list(nil, opts)
 
       @doc """
       List resources of kind `#{unquote(kind)}` in apiVersion
       `#{unquote(api_version)}` in the given `namespace`.
       """
-      @spec list(namespace :: Client.namespace()) :: Kubereq.Client.Req.response()
-      @spec list(namespace :: Client.namespace(), opts :: Keyword.t()) ::
-              Kubereq.Client.Req.response()
+      @spec list(namespace :: Kubereq.namespace()) :: Kubereq.response()
+      @spec list(namespace :: Kubereq.namespace(), opts :: Keyword.t()) ::
+              Kubereq.response()
       def list(namespace, opts \\ []) when is_binary(namespace) or is_nil(namespace),
-        do: Client.list(req(), @resource_list_path, namespace, opts)
+        do: Kubereq.list(req(), namespace, opts)
     end
   end
 
@@ -98,10 +97,10 @@ defmodule Kubegen.API.Namespaced do
       Deletes the resource of kind `#{unquote(kind)}` in apiVersion `#{unquote(api_version)}`
       with `name` in `namespace`.
       """
-      @spec delete(name :: String.t(), namespace :: Client.namespace()) ::
-              Kubereq.Client.Req.response()
+      @spec delete(name :: String.t(), namespace :: Kubereq.namespace()) ::
+              Kubereq.response()
       def delete(name, namespace) do
-        Client.delete(req(), @resource_path, namespace, name)
+        Kubereq.delete(req(), namespace, name)
       end
     end
   end
@@ -112,9 +111,9 @@ defmodule Kubegen.API.Namespaced do
       Deletes all the resources of kind `#{unquote(kind)}` in apiVersion
       `#{unquote(api_version)}` in `namespace`.
       """
-      @spec delete_all(namespace :: Client.namespace()) :: Kubereq.Client.Req.response()
+      @spec delete_all(namespace :: Kubereq.namespace()) :: Kubereq.response()
       def delete_all(namespace) do
-        Client.delete_all(req(), @resource_list_path, namespace)
+        Kubereq.delete_all(req(), namespace)
       end
     end
   end
@@ -125,9 +124,9 @@ defmodule Kubegen.API.Namespaced do
       Updates the given resource of kind `#{unquote(kind)}` in apiVersion
       `#{unquote(api_version)}`.
       """
-      @spec update(resource :: map()) :: Kubereq.Client.Req.response()
+      @spec update(resource :: map()) :: Kubereq.response()
       def update(resource) do
-        Client.update(req(), @resource_path, resource)
+        Kubereq.update(req(), resource)
       end
     end
   end
@@ -142,11 +141,11 @@ defmodule Kubegen.API.Namespaced do
       [Kubernetes documentation about Field Management](https://kubernetes.io/docs/reference/using-api/server-side-apply/#field-management)
       """
       @spec apply(resource :: map()) ::
-              Kubereq.Client.Req.response()
+              Kubereq.response()
       @spec apply(resource :: map(), field_manager :: String.t(), force :: boolean) ::
-              Kubereq.Client.Req.response()
+              Kubereq.response()
       def apply(resource, field_manager \\ "Elixir", force \\ true) do
-        Client.apply(req(), @resource_path, resource, field_manager, force)
+        Kubereq.apply(req(), resource, field_manager, force)
       end
 
       @doc """
@@ -155,11 +154,11 @@ defmodule Kubegen.API.Namespaced do
       """
       @spec json_patch(
               name :: String.t(),
-              namespace :: Client.namespace(),
+              namespace :: Kubereq.namespace(),
               json_patch :: map()
-            ) :: Kubereq.Client.Req.response()
-      def json_patch(json_patch, namespace, name) do
-        Client.json_patch(req(), @resource_path, json_patch, namespace, name)
+            ) :: Kubereq.response()
+      def json_patch(name, namespace, json_patch) do
+        Kubereq.json_patch(req(), json_patch, namespace, name)
       end
 
       @doc """
@@ -168,11 +167,11 @@ defmodule Kubegen.API.Namespaced do
       """
       @spec merge_patch(
               name :: String.t(),
-              namespace :: Client.namespace(),
-              merge_patch :: map()
-            ) :: Kubereq.Client.Req.response()
-      def merge_patch(merge_patch, namespace, name) do
-        Client.merge_patch(req(), @resource_path, merge_patch, namespace, name)
+              namespace :: Kubereq.namespace(),
+              merge_patch :: String.t()
+            ) :: Kubereq.response()
+      def merge_patch(name, namespace, merge_patch) do
+        Kubereq.merge_patch(req(), merge_patch, namespace, name)
       end
     end
   end
@@ -180,17 +179,32 @@ defmodule Kubegen.API.Namespaced do
   def generate_api_for_verb("watch", api_version, kind) do
     quote do
       @doc """
-      Watches for events on resources of kind `#{unquote(kind)}` in apiVersion
-      `#{unquote(api_version)}` in all namespaces.
-      """
-      def watch(opts) when is_list(opts), do: watch(nil, opts)
-
-      @doc """
-      Watches for events on resources of kind `#{unquote(kind)}` in apiVersion
+      Watches for events on all resources of kind `#{unquote(kind)}` in apiVersion
       `#{unquote(api_version)}` in the given `namespace`.
       """
-      def watch(namespace, opts \\ []) when is_binary(namespace) or is_nil(namespace) do
-        Client.watch(req(), @resource_list_path, namespace, opts)
+
+      @spec watch(namespace :: Kubereq.namespace(), opts :: keyword()) :: Kubereq.watch_response()
+      def watch(namespace, opts \\ []) do
+        Kubereq.watch(req(), namespace, opts)
+      end
+
+      @doc """
+      Watches for events on all resources of kind `#{unquote(kind)}` in apiVersion
+      `#{unquote(api_version)}` in all namespaces.
+      """
+      @spec watch_overall(opts :: keyword()) :: Kubereq.watch_response()
+      def watch_overall(opts \\ []) do
+        watch(nil, opts)
+      end
+
+      @doc """
+      Watches for events on a single resource of kind `#{unquote(kind)}`
+      in apiVersion `#{unquote(api_version)}` in the given `namespace`.
+      """
+      @spec watch_single(namespace :: binary(), name :: binary(), opts :: keyword()) ::
+              Kubereq.watch_response()
+      def watch_single(namespace, name, opts \\ []) do
+        Kubereq.watch_single(req(), namespace, name, opts)
       end
     end
   end

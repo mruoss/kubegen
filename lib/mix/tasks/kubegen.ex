@@ -1,5 +1,8 @@
-defmodule Mix.Tasks.KubegenResource do
-  @moduledoc "Generates clients for Kubernetes resources."
+defmodule Mix.Tasks.Kubegen do
+  @moduledoc """
+  (Re-)Generates clients for Kubernetes resources according to the config.
+  """
+  @shortdoc "(Re-)generates Kubernetes Clients"
 
   alias Kubegen.Resource
 
@@ -7,6 +10,7 @@ defmodule Mix.Tasks.KubegenResource do
 
   @cli_opts [strict: [cluster: :string], aliases: [c: :cluster]]
 
+  @impl Mix.Task
   def run(args) do
     {parsed, argv, _errors} = OptionParser.parse(args, @cli_opts)
 
@@ -26,7 +30,7 @@ defmodule Mix.Tasks.KubegenResource do
         Example:
 
         config :kubegen, #{inspect(cluster)},
-          module_prefix: #{app_module()}.K8s.Client
+          module_prefix: #{app_module()}.K8sClient
         '''
       ])
 
@@ -36,7 +40,8 @@ defmodule Mix.Tasks.KubegenResource do
     if is_nil(config[:resources]) do
       Owl.IO.puts([
         IO.ANSI.red(),
-        "List of resoures not set. Please define the list of resources to be generated in config.exs under :kubegen, #{inspect(cluster)}, :resources.",        IO.ANSI.reset(),
+        "List of resoures not set. Please define the list of resources to be generated in config.exs under :kubegen, #{inspect(cluster)}, :resources.",
+        IO.ANSI.reset(),
         ~s'''
 
 
@@ -48,7 +53,6 @@ defmodule Mix.Tasks.KubegenResource do
             "apps/v1/Deployment"
           ]
         '''
-
       ])
 
       exit({:shutdown, 65})

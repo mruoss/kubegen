@@ -12,9 +12,9 @@ defmodule Kubegen.API.ClusterScoped do
       Create a resource of kind `#{unquote(kind)}` in apiVersion
       `#{unquote(api_version)}.`
       """
-      @spec create(resource :: map()) :: Kubereq.Client.Req.response()
+      @spec create(resource :: map()) :: Kubereq.response()
       def create(resource),
-        do: Client.create(req(), @resource_list_path, resource)
+        do: Kubereq.create(req(), resource)
     end
   end
 
@@ -24,9 +24,9 @@ defmodule Kubegen.API.ClusterScoped do
       Get the resource of kind `#{unquote(kind)}` in apiVersion
       `#{unquote(api_version)}` by `name`.
       """
-      @spec get(name :: map()) :: Kubereq.Client.Req.response()
+      @spec get(name :: String.t()) :: Kubereq.response()
       def get(name),
-        do: Client.get(req(), @resource_path, nil, name)
+        do: Kubereq.get(req(), nil, name)
 
       @doc """
       Wait until the given `callback` returns true for a resource of kind
@@ -44,18 +44,17 @@ defmodule Kubegen.API.ClusterScoped do
         Defaults to `10_000`.
 
       """
-      @spec wait_until(name :: String.t(), callback :: Client.wait_until_callback()) ::
+      @spec wait_until(name :: String.t(), callback :: Kubereq.wait_until_callback()) ::
               :ok | {:error, timeout}
       @spec wait_until(
               name :: String.t(),
-              callback :: Client.wait_until_callback(),
+              callback :: Kubereq.wait_until_callback(),
               timeout :: integer()
             ) :: :ok | {:error, timeout}
       def wait_until(name, callback, timeout \\ 10_000),
         do:
-          Client.wait_until(
+          Kubereq.wait_until(
             req(),
-            @resource_list_path,
             nil,
             name,
             callback,
@@ -70,9 +69,9 @@ defmodule Kubegen.API.ClusterScoped do
       List resources of kind `#{unquote(kind)}` in apiVersion
       `#{unquote(api_version)}`.
       """
-      @spec list() :: Kubereq.Client.Req.response()
-      @spec list(opts :: keyword()) :: Kubereq.Client.Req.response()
-      def list(opts \\ []), do: Client.list(req(), @resource_list_path, nil, opts)
+      @spec list() :: Kubereq.response()
+      @spec list(opts :: keyword()) :: Kubereq.response()
+      def list(opts \\ []), do: Kubereq.list(req(), nil, opts)
     end
   end
 
@@ -82,9 +81,9 @@ defmodule Kubegen.API.ClusterScoped do
       Deletes the resource of kind `#{unquote(kind)}` in apiVersion
       `#{unquote(api_version)}` with `name`.
       """
-      @spec delete(name :: String.t()) :: Kubereq.Client.Req.response()
+      @spec delete(name :: String.t()) :: Kubereq.response()
       def delete(name) do
-        Client.delete(req(), @resource_path, nil, name)
+        Kubereq.delete(req(), nil, name)
       end
     end
   end
@@ -95,9 +94,9 @@ defmodule Kubegen.API.ClusterScoped do
       Deletes all the resources of kind `#{unquote(kind)}` in apiVersion
       `#{unquote(api_version)}`.
       """
-      @spec delete_all() :: Kubereq.Client.Req.response()
+      @spec delete_all() :: Kubereq.response()
       def delete_all() do
-        Client.delete_all(req(), @resource_list_path, nil)
+        Kubereq.delete_all(req(), nil)
       end
     end
   end
@@ -108,9 +107,9 @@ defmodule Kubegen.API.ClusterScoped do
       Updates the given resource of kind `#{unquote(kind)}` in apiVersion
       `#{unquote(api_version)}`.
       """
-      @spec update(resource :: map()) :: Kubereq.Client.Req.response()
+      @spec update(resource :: map()) :: Kubereq.response()
       def update(resource) do
-        Client.update(req(), @resource_path, resource)
+        Kubereq.update(req(), resource)
       end
     end
   end
@@ -124,11 +123,11 @@ defmodule Kubegen.API.ClusterScoped do
       In order to understand `fieldManager` and `force`, refer to the
       [Kubernetes documentation about Field Management](https://kubernetes.io/docs/reference/using-api/server-side-apply/#field-management)
       """
-      @spec apply(update :: map()) :: Kubereq.Client.Req.response()
+      @spec apply(update :: map()) :: Kubereq.response()
       @spec apply(update :: map(), field_manager :: String.t(), force :: boolean()) ::
-              Kubereq.Client.Req.response()
+              Kubereq.response()
       def apply(resource, field_manager \\ "Elixir", force \\ true) do
-        Client.apply(req(), @resource_path, resource, field_manager, force)
+        Kubereq.apply(req(), resource, field_manager, force)
       end
 
       @doc """
@@ -136,19 +135,19 @@ defmodule Kubegen.API.ClusterScoped do
       `#{unquote(api_version)}` with the given `json_patch`.
       """
       @spec json_patch(name :: String.t(), json_patch :: map()) ::
-              Kubereq.Client.Req.response()
+              Kubereq.response()
       def json_patch(name, json_patch) do
-        Client.json_patch(req(), @resource_path, json_patch, nil, name)
+        Kubereq.json_patch(req(), json_patch, nil, name)
       end
 
       @doc """
       Patches the given resource of kind `#{unquote(kind)}` in apiVersion
       `#{unquote(api_version)}` with the given `merge_patch`.
       """
-      @spec merge_patch(name :: String.t(), merge_patch :: map()) ::
-              Kubereq.Client.Req.response()
+      @spec merge_patch(name :: String.t(), merge_patch :: String.t()) ::
+              Kubereq.response()
       def merge_patch(name, merge_patch) do
-        Client.merge_patch(req(), @resource_path, merge_patch, nil, name)
+        Kubereq.merge_patch(req(), merge_patch, nil, name)
       end
     end
   end
@@ -159,10 +158,19 @@ defmodule Kubegen.API.ClusterScoped do
       Watches for events on resources of kind `#{unquote(kind)}` in apiVersion
       `#{unquote(api_version)}`.
       """
-      @spec watch() :: Kubereq.Client.Req.response()
-      @spec watch(opts :: keyword()) :: Kubereq.Client.Req.response()
+      @spec watch() :: Kubereq.watch_response()
+      @spec watch(opts :: keyword()) :: Kubereq.watch_response()
       def watch(opts \\ []) do
-        Client.watch(req(), @resource_list_path, nil, opts)
+        Kubereq.watch(req(), nil, opts)
+      end
+
+      @doc """
+      Watches for events on a single resource of kind `#{unquote(kind)}` in apiVersion
+      `#{unquote(api_version)}`.
+      """
+      @spec watch_single(name :: String.t(), opts :: keyword()) :: Kubereq.watch_response()
+      def watch_single(name, opts) do
+        Kubereq.watch_single(req(), nil, name, opts)
       end
     end
   end

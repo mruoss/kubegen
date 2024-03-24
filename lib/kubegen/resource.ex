@@ -38,13 +38,13 @@ defmodule Kubegen.Resource do
     } = resource_definition
 
     resource_path =
-      Kubereq.Client.resource_path(
+      resource_path(
         api_version,
         resource_definition
       )
 
     resource_list_path =
-      Kubereq.Client.resource_list_path(
+      resource_list_path(
         api_version,
         resource_definition
       )
@@ -61,44 +61,27 @@ defmodule Kubegen.Resource do
       |> Utils.format_multiline_docs()
 
     attributes =
-      [
-        if Enum.any?(verbs, &(&1 in ["get", "delete", "update", "patch"])) do
-          quote do: @resource_path(unquote(resource_path))
-        end,
-        if Enum.any?(verbs, &(&1 in ["create", "get", "list", "deletecollection", "watch"])) do
-          quote do: @resource_list_path(unquote(resource_list_path))
-        end
-      ]
-      |> Enum.filter(& &1)
-      |> Utils.put_newlines()
-
-    use_stmt =
-      quote(do: use(Kubereq))
-      |> Utils.put_newlines()
-
-    steps =
       quote do
-        step Kubeconf.ENV
-        step Kubeconf.File, path: ".kube/config", relative_to_home?: true
-        step Kubeconf.ServiceAccount
+        @resource_path unquote(resource_path)
+        @resource_list_path unquote(resource_list_path)
       end
       |> Utils.flatten_blocks()
-
-    aliases =
-      quote(do: alias(Kubereq.Client))
       |> Utils.put_newlines()
+
+    req_func =
+      quote do
+        defp req() do
+          Kubeconf.Default
+          |> Kubeconf.kubeconf()
+          |> Kubereq.new(@resource_path, @resource_list_path)
+        end
+      end
 
     ast =
       quote do
         defmodule unquote(api_module) do
-          unquote(use_stmt)
-
-          unquote(aliases)
-
           unquote_splicing(attributes)
-
-          unquote_splicing(steps)
-
+          unquote(req_func)
           unquote_splicing(functions)
         end
       end
@@ -131,7 +114,7 @@ defmodule Kubegen.Resource do
       }
     } = crd
 
-    namespaced = scope === "namespaced"
+    namespaced = scope === "Namespaced"
 
     discovery = %{
       "name" => name,
@@ -195,5 +178,42 @@ defmodule Kubegen.Resource do
       |> Module.concat()
 
     {resource_module, api_version}
+  end
+
+  @spec resource_path(api_version :: String.t(), resource_definition :: map()) :: String.t()
+  defp resource_path(<<?v, _::integer>> = api_version, resource_definition) do
+    do_resource_path("api/#{api_version}", resource_definition)
+  end
+
+  defp resource_path(api_version, resource_definition) do
+    do_resource_path("apis/#{api_version}", resource_definition)
+  end
+
+  @spec do_resource_path(api_version :: String.t(), resource_definition :: map()) :: String.t()
+  defp do_resource_path(api_version, %{"name" => resource_name, "namespaced" => true}) do
+    "#{api_version}/namespaces/:namespace/#{resource_name}/:name"
+  end
+
+  defp do_resource_path(api_version, %{"name" => resource_name, "namespaced" => false}) do
+    "#{api_version}/#{resource_name}/:name"
+  end
+
+  @spec resource_list_path(api_version :: String.t(), resource_definition :: map()) :: String.t()
+  defp resource_list_path(<<?v, _::integer>> = api_version, resource_definition) do
+    do_resource_list_path("api/#{api_version}", resource_definition)
+  end
+
+  defp resource_list_path(api_version, resource_definition) do
+    do_resource_list_path("apis/#{api_version}", resource_definition)
+  end
+
+  @spec do_resource_list_path(api_version :: String.t(), resource_definition :: map()) ::
+          String.t()
+  defp do_resource_list_path(api_version, %{"name" => resource_name, "namespaced" => true}) do
+    "#{api_version}/namespaces/:namespace/#{resource_name}"
+  end
+
+  defp do_resource_list_path(api_version, %{"name" => resource_name, "namespaced" => false}) do
+    "#{api_version}/#{resource_name}"
   end
 end

@@ -60,4 +60,18 @@ defmodule Kubegen.Utils do
       block
     end
   end
+
+  @spec resource_path(api_version :: String.t(), resource_definition :: map()) :: String.t()
+  def resource_path(<<?v, _::integer>> = api_version, resource_definition) do
+    do_resource_path("api/#{api_version}", resource_definition)
+  end
+
+  def resource_path(api_version, resource_definition) do
+    do_resource_path("apis/#{api_version}", resource_definition)
+  end
+
+  @spec do_resource_path(api_version :: String.t(), resource_definition :: map()) :: String.t()
+  defp do_resource_path(api_version, %{"name" => resource_name, "namespaced" => true}) do
+    "#{api_version}/namespaces/:namespace/#{resource_name}/:name"
+  end
 end

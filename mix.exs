@@ -30,7 +30,7 @@ defmodule Kubegen.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:kubereq, path: "../kubereq"},
+      {:kubereq, path: "../kubereq", optional: true},
       {:owl, "~> 0.9.0"},
 
       # Dev deps
@@ -38,7 +38,7 @@ defmodule Kubegen.MixProject do
 
       # Test deps
       {:ex_doc, "~> 0.31", only: :dev, runtime: false},
-      {:excoveralls, "~> 0.18", only: :test},
+      {:excoveralls, "~> 0.18", only: :test}
     ]
   end
 
@@ -86,7 +86,8 @@ defmodule Kubegen.MixProject do
     [
       ignore_warnings: ".dialyzer_ignore.exs",
       plt_core_path: "priv/plts",
-      plt_file: {:no_warn, "priv/plts/#{@app}.plt"}
+      plt_file: {:no_warn, "priv/plts/#{@app}.plt"},
+      plt_add_apps: [:mix]
     ]
   end
 end

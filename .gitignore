@@ -26,7 +26,7 @@ kubegen-*.tar
 /tmp/
 
 # Generated Files
-/lib/kubegen/k8s/
+/lib/kubegen/k8s_client/
 
 # Ignore dialyzer files
 /priv/plts/
