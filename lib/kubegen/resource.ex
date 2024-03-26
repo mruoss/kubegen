@@ -43,12 +43,6 @@ defmodule Kubegen.Resource do
         resource_definition
       )
 
-    resource_list_path =
-      resource_list_path(
-        api_version,
-        resource_definition
-      )
-
     generator_module =
       if Map.fetch!(resource_definition, "namespaced"),
         do: Kubegen.API.Namespaced,
@@ -63,17 +57,16 @@ defmodule Kubegen.Resource do
     attributes =
       quote do
         @resource_path unquote(resource_path)
-        @resource_list_path unquote(resource_list_path)
       end
-      |> Utils.flatten_blocks()
       |> Utils.put_newlines()
+      |> List.wrap()
 
     req_func =
       quote do
         defp req() do
           Kubeconf.Default
           |> Kubeconf.kubeconf()
-          |> Kubereq.new(@resource_path, @resource_list_path)
+          |> Kubereq.new(@resource_path)
         end
       end
 
@@ -196,24 +189,5 @@ defmodule Kubegen.Resource do
 
   defp do_resource_path(api_version, %{"name" => resource_name, "namespaced" => false}) do
     "#{api_version}/#{resource_name}/:name"
-  end
-
-  @spec resource_list_path(api_version :: String.t(), resource_definition :: map()) :: String.t()
-  defp resource_list_path(<<?v, _::integer>> = api_version, resource_definition) do
-    do_resource_list_path("api/#{api_version}", resource_definition)
-  end
-
-  defp resource_list_path(api_version, resource_definition) do
-    do_resource_list_path("apis/#{api_version}", resource_definition)
-  end
-
-  @spec do_resource_list_path(api_version :: String.t(), resource_definition :: map()) ::
-          String.t()
-  defp do_resource_list_path(api_version, %{"name" => resource_name, "namespaced" => true}) do
-    "#{api_version}/namespaces/:namespace/#{resource_name}"
-  end
-
-  defp do_resource_list_path(api_version, %{"name" => resource_name, "namespaced" => false}) do
-    "#{api_version}/#{resource_name}"
   end
 end

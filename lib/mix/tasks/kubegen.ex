@@ -75,7 +75,16 @@ defmodule Mix.Tasks.Kubegen do
       file_path |> Path.dirname() |> File.mkdir_p!()
       File.write(file_path, rendered)
 
-      IO.puts("Generated module #{module_name} in file #{file_path}")
+      Owl.IO.puts([
+        "Generated module ",
+        IO.ANSI.green(),
+        "#{module_name}",
+        IO.ANSI.reset(),
+        " in file ",
+        IO.ANSI.yellow(),
+        file_path,
+        IO.ANSI.reset()
+      ])
     end
   end
 
