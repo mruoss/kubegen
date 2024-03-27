@@ -5,5 +5,6 @@ config :kubegen, :default,
   resources: [
     "v1/ConfigMap",
     "rbac.authorization.k8s.io/v1/ClusterRole",
-    "test/support/foos.example.com.yaml"
+    "test/support/foos.example.com.yaml",
+    "v1/Namespace"
   ]

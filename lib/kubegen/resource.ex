@@ -65,7 +65,7 @@ defmodule Kubegen.Resource do
       quote do
         defp req() do
           Kubeconf.Default
-          |> Kubeconf.kubeconf()
+          |> Kubeconf.load()
           |> Kubereq.new(@resource_path)
         end
       end

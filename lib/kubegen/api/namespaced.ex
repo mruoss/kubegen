@@ -49,22 +49,15 @@ defmodule Kubegen.API.Namespaced do
               namespace :: Kubereq.namespace(),
               name :: String.t(),
               callback :: Kubereq.wait_until_callback()
-            ) :: :ok | {:error, timeout}
+            ) :: :ok | {:error, :timeout}
       @spec wait_until(
               namespace :: Kubereq.namespace(),
               name :: String.t(),
               callback :: Kubereq.wait_until_callback(),
               timeout :: integer()
-            ) :: :ok | {:error, timeout}
+            ) :: Kubereq.wait_until_response()
       def wait_until(namespace, name, callback, timeout \\ 10_000),
-        do:
-          Kubereq.wait_until(
-            req(),
-            namespace,
-            name,
-            callback,
-            timeout
-          )
+        do: Kubereq.wait_until(req(), namespace, name, callback, timeout)
     end
   end
 
@@ -76,12 +69,25 @@ defmodule Kubegen.API.Namespaced do
       @spec list() :: Kubereq.response()
       def list(), do: list(nil, [])
 
+      @doc """
+      List resources of kind `#{unquote(kind)}` in apiVersion `#{unquote(api_version)}` in all namespaces.
+
+      ### Options
+
+      * `:field_selectors` - A list of field selectors. See `Kubereq.Step.FieldSelector` for more infos.
+      * `:label_selectors` - A list of field selectors. See `Kubereq.Step.LabelSelector` for more infos.
+      """
       @spec list(opts :: Keyword.t()) :: Kubereq.response()
       def list(opts) when is_list(opts), do: list(nil, opts)
 
       @doc """
       List resources of kind `#{unquote(kind)}` in apiVersion
       `#{unquote(api_version)}` in the given `namespace`.
+
+      ### Options
+
+      * `:field_selectors` - A list of field selectors. See `Kubereq.Step.FieldSelector` for more infos.
+      * `:label_selectors` - A list of field selectors. See `Kubereq.Step.LabelSelector` for more infos.
       """
       @spec list(namespace :: Kubereq.namespace()) :: Kubereq.response()
       @spec list(namespace :: Kubereq.namespace(), opts :: Keyword.t()) ::
@@ -97,9 +103,9 @@ defmodule Kubegen.API.Namespaced do
       Deletes the resource of kind `#{unquote(kind)}` in apiVersion `#{unquote(api_version)}`
       with `name` in `namespace`.
       """
-      @spec delete(name :: String.t(), namespace :: Kubereq.namespace()) ::
+      @spec delete(namespace :: String.t(), name :: Kubereq.namespace()) ::
               Kubereq.response()
-      def delete(name, namespace) do
+      def delete(namespace, name) do
         Kubereq.delete(req(), namespace, name)
       end
     end
@@ -110,10 +116,15 @@ defmodule Kubegen.API.Namespaced do
       @doc """
       Deletes all the resources of kind `#{unquote(kind)}` in apiVersion
       `#{unquote(api_version)}` in `namespace`.
+
+      ### Options
+
+      * `:field_selectors` - A list of field selectors. See `Kubereq.Step.FieldSelector` for more infos.
+      * `:label_selectors` - A list of field selectors. See `Kubereq.Step.LabelSelector` for more infos.
       """
-      @spec delete_all(namespace :: Kubereq.namespace()) :: Kubereq.response()
-      def delete_all(namespace) do
-        Kubereq.delete_all(req(), namespace)
+      @spec delete_all(namespace :: Kubereq.namespace(), opts :: keyword()) :: Kubereq.response()
+      def delete_all(namespace, opts \\ []) do
+        Kubereq.delete_all(req(), namespace, opts)
       end
     end
   end
@@ -180,26 +191,51 @@ defmodule Kubegen.API.Namespaced do
     quote do
       @doc """
       Watches for events on all resources of kind `#{unquote(kind)}` in apiVersion
-      `#{unquote(api_version)}` in the given `namespace`.
+      `#{unquote(api_version)}` in all namespaces.
       """
+      @spec watch() :: Kubereq.watch_response()
+      def watch(), do: watch(nil, [])
 
+      @doc """
+      Watches for events on all resources of kind `#{unquote(kind)}` in apiVersion
+      `#{unquote(api_version)}` in all namespaces.
+
+      ### Options
+
+      * `:resource_version` - If given, starts to stream from the given `resourceVersion` of the resource list. Otherwise starts streaming from HEAD.
+      * `:stream_to` - If set to a `pid`, streams events to the given pid. If set to `{pid, ref}`, the messages are in the form `{ref, event}`.
+      * `:field_selectors` - A list of field selectors. See `Kubereq.Step.FieldSelector` for more infos.
+      * `:label_selectors` - A list of field selectors. See `Kubereq.Step.LabelSelector` for more infos.
+      """
+      @spec watch(opts :: keyword()) :: Kubereq.watch_response()
+      def watch(opts) when is_list(opts), do: watch(nil, opts)
+
+      @doc """
+      Watches for events on all resources of kind `#{unquote(kind)}` in apiVersion
+      `#{unquote(api_version)}` in the given `namespace`.
+
+      ### Options
+
+      * `:resource_version` - If given, starts to stream from the given `resourceVersion` of the resource list. Otherwise starts streaming from HEAD.
+      * `:stream_to` - If set to a `pid`, streams events to the given pid. If set to `{pid, ref}`, the messages are in the form `{ref, event}`.
+      * `:field_selectors` - A list of field selectors. See `Kubereq.Step.FieldSelector` for more infos.
+      * `:label_selectors` - A list of field selectors. See `Kubereq.Step.LabelSelector` for more infos.
+      """
       @spec watch(namespace :: Kubereq.namespace(), opts :: keyword()) :: Kubereq.watch_response()
       def watch(namespace, opts \\ []) do
         Kubereq.watch(req(), namespace, opts)
       end
 
       @doc """
-      Watches for events on all resources of kind `#{unquote(kind)}` in apiVersion
-      `#{unquote(api_version)}` in all namespaces.
-      """
-      @spec watch_overall(opts :: keyword()) :: Kubereq.watch_response()
-      def watch_overall(opts \\ []) do
-        watch(nil, opts)
-      end
-
-      @doc """
       Watches for events on a single resource of kind `#{unquote(kind)}`
       in apiVersion `#{unquote(api_version)}` in the given `namespace`.
+
+      ### Options
+
+      * `:resource_version` - If given, starts to stream from the given `resourceVersion` of the resource list. Otherwise starts streaming from HEAD.
+      * `:stream_to` - If set to a `pid`, streams events to the given pid. If set to `{pid, ref}`, the messages are in the form `{ref, event}`.
+      * `:field_selectors` - A list of field selectors. See `Kubereq.Step.FieldSelector` for more infos.
+      * `:label_selectors` - A list of field selectors. See `Kubereq.Step.LabelSelector` for more infos.
       """
       @spec watch_single(namespace :: binary(), name :: binary(), opts :: keyword()) ::
               Kubereq.watch_response()

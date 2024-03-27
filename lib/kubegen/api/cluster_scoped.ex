@@ -50,7 +50,7 @@ defmodule Kubegen.API.ClusterScoped do
               name :: String.t(),
               callback :: Kubereq.wait_until_callback(),
               timeout :: integer()
-            ) :: :ok | {:error, timeout}
+            ) :: Kubereq.wait_until_response()
       def wait_until(name, callback, timeout \\ 10_000),
         do:
           Kubereq.wait_until(
@@ -68,6 +68,11 @@ defmodule Kubegen.API.ClusterScoped do
       @doc """
       List resources of kind `#{unquote(kind)}` in apiVersion
       `#{unquote(api_version)}`.
+
+      ### Options
+
+      * `:field_selectors` - A list of field selectors. See `Kubereq.Step.FieldSelector` for more infos.
+      * `:label_selectors` - A list of field selectors. See `Kubereq.Step.LabelSelector` for more infos.
       """
       @spec list() :: Kubereq.response()
       @spec list(opts :: keyword()) :: Kubereq.response()
@@ -93,10 +98,15 @@ defmodule Kubegen.API.ClusterScoped do
       @doc """
       Deletes all the resources of kind `#{unquote(kind)}` in apiVersion
       `#{unquote(api_version)}`.
+
+      ### Options
+
+      * `:field_selectors` - A list of field selectors. See `Kubereq.Step.FieldSelector` for more infos.
+      * `:label_selectors` - A list of field selectors. See `Kubereq.Step.LabelSelector` for more infos.
       """
-      @spec delete_all() :: Kubereq.response()
-      def delete_all() do
-        Kubereq.delete_all(req(), nil)
+      @spec delete_all(opts :: keyword()) :: Kubereq.response()
+      def delete_all(opts \\ []) do
+        Kubereq.delete_all(req(), nil, opts)
       end
     end
   end
@@ -157,6 +167,13 @@ defmodule Kubegen.API.ClusterScoped do
       @doc """
       Watches for events on resources of kind `#{unquote(kind)}` in apiVersion
       `#{unquote(api_version)}`.
+
+      ### Options
+
+      * `:resource_version` - If given, starts to stream from the given `resourceVersion` of the resource list. Otherwise starts streaming from HEAD.
+      * `:stream_to` - If set to a `pid`, streams events to the given pid. If set to `{pid, ref}`, the messages are in the form `{ref, event}`.
+      * `:field_selectors` - A list of field selectors. See `Kubereq.Step.FieldSelector` for more infos.
+      * `:label_selectors` - A list of field selectors. See `Kubereq.Step.LabelSelector` for more infos.
       """
       @spec watch() :: Kubereq.watch_response()
       @spec watch(opts :: keyword()) :: Kubereq.watch_response()
@@ -167,9 +184,16 @@ defmodule Kubegen.API.ClusterScoped do
       @doc """
       Watches for events on a single resource of kind `#{unquote(kind)}` in apiVersion
       `#{unquote(api_version)}`.
+
+      ### Options
+
+      * `:resource_version` - If given, starts to stream from the given `resourceVersion` of the resource list. Otherwise starts streaming from HEAD.
+      * `:stream_to` - If set to a `pid`, streams events to the given pid. If set to `{pid, ref}`, the messages are in the form `{ref, event}`.
+      * `:field_selectors` - A list of field selectors. See `Kubereq.Step.FieldSelector` for more infos.
+      * `:label_selectors` - A list of field selectors. See `Kubereq.Step.LabelSelector` for more infos.
       """
       @spec watch_single(name :: String.t(), opts :: keyword()) :: Kubereq.watch_response()
-      def watch_single(name, opts) do
+      def watch_single(name, opts \\ []) do
         Kubereq.watch_single(req(), nil, name, opts)
       end
     end
