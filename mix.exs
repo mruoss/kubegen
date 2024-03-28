@@ -30,22 +30,23 @@ defmodule Kubegen.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:kubereq, path: "../kubereq", optional: true},
+      {:kubereq, "~> 0.1.0", optional: true},
       {:owl, "~> 0.9.0"},
 
-      # Dev deps
-      {:dialyxir, "~> 1.4.0", only: [:dev, :test], runtime: false},
-
       # Test deps
+      {:excoveralls, "~> 0.18", only: :test},
+      {:mix_test_watch, "~> 1.0", only: [:dev, :test], runtime: false},
+
+      # Dev deps
+      {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:ex_doc, "~> 0.31", only: :dev, runtime: false},
-      {:excoveralls, "~> 0.18", only: :test}
+      {:dialyxir, "~> 1.4.0", only: [:dev, :test], runtime: false}
     ]
   end
 
   defp docs do
     [
-      # The main page in the docs
-      # main: "Pluggable.Token",
+      main: "readme",
       source_ref: @version,
       source_url: @source_url,
       extras: [
@@ -78,7 +79,15 @@ defmodule Kubegen.MixProject do
         "Changelog" => "https://hexdocs.pm/#{@app}/changelog.html",
         "Sponsor" => "https://github.com/sponsors/mruoss"
       },
-      files: ["lib", "mix.exs", "README.md", "LICENSE", "CHANGELOG.md", ".formatter.exs"]
+      files: [
+        "lib",
+        "build",
+        "mix.exs",
+        "README.md",
+        "LICENSE.md",
+        "CHANGELOG.md",
+        ".formatter.exs"
+      ]
     ]
   end
 

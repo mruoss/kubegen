@@ -1,19 +1,23 @@
 defmodule Kubegen.Resource do
+  @moduledoc false
+
   alias Kubegen.Utils
 
   @discovery elem(Code.eval_file("build/discovery.ex"), 0)
 
-  def generate(resources, module_prefix) do
+  def generate(resources, module_prefix, kubeconfig_pipeline) do
     for resource <- resources,
         {gvk, definition} <- get_definitions(resource),
         {module, api_version} = derive_module_and_api_version(module_prefix, gvk),
-        generated_resource <- generate_resource(definition, module, api_version) do
+        generated_resource <-
+          generate_resource(definition, module, api_version, kubeconfig_pipeline) do
       generated_resource
     end
   end
 
-  defp generate_resource(resource_definition, resource_module, api_version) do
-    main_resource = do_add_api(api_version, resource_definition, resource_module)
+  defp generate_resource(resource_definition, resource_module, api_version, kubeconfig_pipeline) do
+    main_resource =
+      do_add_api(api_version, resource_definition, resource_module, kubeconfig_pipeline)
 
     subresources =
       for subresource_definition <- List.wrap(resource_definition["subresources"]),
@@ -24,14 +28,15 @@ defmodule Kubegen.Resource do
         do_add_api(
           api_version,
           subresource_definition,
-          subresource_resource_module
+          subresource_resource_module,
+          kubeconfig_pipeline
         )
       end
 
     [main_resource | subresources]
   end
 
-  defp do_add_api(api_version, resource_definition, api_module) do
+  defp do_add_api(api_version, resource_definition, api_module, kubeconfig_pipeline) do
     %{
       "name" => name,
       "verbs" => verbs
@@ -64,8 +69,8 @@ defmodule Kubegen.Resource do
     req_func =
       quote do
         defp req() do
-          Kubeconf.Default
-          |> Kubeconf.load()
+          unquote(kubeconfig_pipeline)
+          |> Kubereq.Kubeconfig.load()
           |> Kubereq.new(@resource_path)
         end
       end
@@ -90,6 +95,14 @@ defmodule Kubegen.Resource do
       File.exists?(resource) ->
         resource
         |> YamlElixir.read_all_from_file!()
+        |> Enum.flat_map(&crd_to_gvk_and_discovery/1)
+
+      URI.parse(resource) ->
+        {:ok, _} = Application.ensure_all_started(:req)
+        %{status: 200} = req = Req.get!(resource)
+
+        req.body
+        |> YamlElixir.read_all_from_string!()
         |> Enum.flat_map(&crd_to_gvk_and_discovery/1)
 
       :otherwise ->
@@ -159,8 +172,7 @@ defmodule Kubegen.Resource do
           api_module =
             api
             |> String.split(".")
-            |> Enum.map(&String.capitalize/1)
-            |> Enum.join("")
+            |> Enum.map_join("", &String.capitalize/1)
 
           {[api_module, String.capitalize(version), kind], "#{api}/#{version}"}
       end

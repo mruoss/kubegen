@@ -52,3 +52,34 @@ jobs:
 
       - name: Run Credo
         run: MIX_ENV=test mix credo --strict
+
+      - name: Retrieve PLT Cache
+        uses: actions/cache/restore@v4
+        id: plt-cache
+        with:
+          key: |
+            ${{ runner.os }}-${{ steps.beam.outputs.elixir-version }}-${{ steps.beam.outputs.ito-version }}-plt-${{ hashFiles('**/mix.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ steps.beam.outputs.elixir-version }}-${{ steps.beam.outputs.otp-version }}-plt-
+          path: |
+            priv/plts
+
+      # Create PLTs if no cache was found
+      - name: Create PLTs
+        if: steps.plt-cache.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p priv/plts
+          MIX_ENV=test mix dialyzer --plt
+
+      - name: Save PLT cache
+        id: plt_cache_save
+        uses: actions/cache/save@v4
+        if: steps.plt-cache.outputs.cache-hit != 'true'
+        with:
+          key: |
+            ${{ runner.os }}-${{ steps.beam.outputs.elixir-version }}-${{ steps.beam.outputs.ito-version }}-plt-${{ hashFiles('**/mix.lock') }}
+          path: |
+            priv/plts
+
+      - name: Run dialyzer
+        run: MIX_ENV=test mix dialyzer --format github

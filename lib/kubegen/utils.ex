@@ -1,4 +1,6 @@
 defmodule Kubegen.Utils do
+  @moduledoc false
+
   @spec put_newlines(Macro.t()) :: Macro.t()
   def put_newlines({term, metadata, arguments}) do
     end_of_expression =

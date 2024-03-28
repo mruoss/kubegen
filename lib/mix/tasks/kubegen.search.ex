@@ -2,7 +2,11 @@ defmodule Mix.Tasks.Kubegen.Search do
   @moduledoc ~S"""
   Search Group-Version-Kind (GVK) for Core Resources.
   Kubegen requires you to pass GVK as keys in `config.exs`. This mix tasks
-  lets you search for GVK for a specific resource kind
+  lets you search for GVK for a specific resource kind.
+
+  ### Example
+
+      mix kubegen.search Pod
   """
   @shortdoc "Search Group-Version-Kind for Core Resources."
 
