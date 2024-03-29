@@ -3,7 +3,7 @@ defmodule Kubegen.MixProject do
 
   @app :kubegen
   @source_url "https://github.com/mruoss/#{@app}"
-  @version "0.1.0"
+  @version "0.1.1"
 
   def project do
     [
@@ -76,7 +76,7 @@ defmodule Kubegen.MixProject do
     [
       name: @app,
       maintainers: ["Michael Ruoss"],
-      licenses: ["Apache-2.0"],
+      licenses: ["MIT"],
       links: %{
         "GitHub" => @source_url,
         "Changelog" => "https://hexdocs.pm/#{@app}/changelog.html",
