@@ -97,7 +97,7 @@ defmodule Kubegen.Resource do
         |> YamlElixir.read_all_from_file!()
         |> Enum.flat_map(&crd_to_gvk_and_discovery/1)
 
-      URI.parse(resource) ->
+      Regex.match?(~r"^https://", resource) ->
         {:ok, _} = Application.ensure_all_started(:req)
         %{status: 200} = req = Req.get!(resource)
 
