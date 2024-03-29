@@ -63,3 +63,56 @@ Use `mix kubegen.search` to search for GVKs (e.g. `mix.kubegen.search Pod`)
 ### Generate Resource Clients
 
 Now you can (re-)generate clients using `mix kubegen` or `mix kubegen -c mycluster`
+
+## Using the generated Clients
+
+`kubegen` creates a module per resource and subresource. Each resource is
+generaated with functions for the operations applicable to that resource. The
+generated functions also come with `@doc` documentations.
+
+### ConfigMap Example
+
+You can use `apply/3` or `create/2` to create a new resource:
+
+```ex
+import YamlElixir.Sigil
+alias MyApp.K8sClient.Core.V1.ConfigMap
+
+ConfigMap.apply(~y"""
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: default
+  name: my-config
+  labels:
+    app: my-app
+data:
+  foo: bar
+""")
+```
+
+To retrieve a resource, use `get/2`:
+
+```ex
+ConfigMap.get("default", "my-config")
+```
+
+Use `list/0` or `list/1` to list resources of that kind in all namespaces or
+`list/2` to list resources in a specific namespace. Label or field selectors can
+be passed as option if needed.
+
+```ex
+ConfigMap.list("default", label_selectors: [{"app", "my-app"}])
+```
+
+`delete/2` and `delete_all/2` delete a single or multiple resources (whereas the
+latter also supports selectors).
+
+```ex
+ConfigMap.delete("default", "my-config")
+ConfigMap.delete_all("default", label_selectors: [{"app", "my-app"}])
+```
+
+There are more functions like `update/1`, `json_path/3`, `merge_patch/3`,
+`watch/N`, `watch_single/3` `wait_until/4`. Checkout the generated modules for
+their documentation.
