@@ -33,7 +33,7 @@ defmodule Kubegen.MixProject do
     [
       {:kubereq, "~> 0.1.0", optional: true},
       {:owl, "~> 0.9.0"},
-      {:req, "~> 0.4.0"},
+      {:req, "~> 0.5.0"},
       {:yaml_elixir, "~> 2.0"},
 
       # Test deps
