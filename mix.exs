@@ -32,7 +32,7 @@ defmodule Kubegen.MixProject do
   defp deps do
     [
       {:kubereq, "~> 0.1.2", optional: true},
-      {:owl, "~> 0.10.0"},
+      {:owl, "~> 0.11.0"},
       {:req, "~> 0.5.0"},
       {:yaml_elixir, "~> 2.0"},
 
