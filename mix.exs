@@ -31,7 +31,7 @@ defmodule Kubegen.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:kubereq, "~> 0.2.0", optional: true},
+      {:kubereq, "~> 0.3.0", optional: true},
       {:owl, "~> 0.11.0"},
       {:req, "~> 0.5.0"},
       {:yaml_elixir, "~> 2.0"},
