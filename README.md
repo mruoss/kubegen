@@ -17,8 +17,8 @@ add `kubereq` to your list of dependencies as well:
 ```elixir
 def deps do
   [
-    {:kubegen, "~> 0.1.0", only: :dev, runtime: false},
-    {:kubereq, "~> 0.1.0"}
+    {:kubegen, "~> 0.1.2", only: :dev, runtime: false},
+    {:kubereq, "~> 0.3.0"}
   ]
 end
 ```

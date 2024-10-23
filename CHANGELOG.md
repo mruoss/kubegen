@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+<!-- Add your changelog entry to the relevant subsection -->
+
+<!-- ### Added | Changed | Deprecated | Removed | Fixed | Security -->
+
+<!-- No new entries below this line! -->
+
+## 0.1.2
+
+## Fixed
+
 - Use Kubereq.attach/2 in place of deprecated Kubereq.new/2 [#37](https://github.com/mruoss/kubegen/issues/37), [#38](https://github.com/mruoss/kubegen/pull/38)
 
 ## 0.1.1
@@ -14,9 +24,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - License was wrong in `mix.exs`
-
-<!-- Add your changelog entry to the relevant subsection -->
-
-<!-- ### Added | Changed | Deprecated | Removed | Fixed | Security -->
-
-<!-- No new entries below this line! -->
