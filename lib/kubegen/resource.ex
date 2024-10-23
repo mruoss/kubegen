@@ -71,7 +71,7 @@ defmodule Kubegen.Resource do
         defp req() do
           unquote(kubeconfig_pipeline)
           |> Kubereq.Kubeconfig.load()
-          |> Kubereq.new(@resource_path)
+          |> Kubereq.attach(@resource_path)
         end
       end
 
