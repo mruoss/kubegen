@@ -69,9 +69,11 @@ defmodule Kubegen.Resource do
     req_func =
       quote do
         defp req() do
-          unquote(kubeconfig_pipeline)
-          |> Kubereq.Kubeconfig.load()
-          |> Kubereq.attach(resource_path: @resource_path)
+          Req.new()
+          |> Kubereq.attach(
+            kubeconfig: unquote(kubeconfig_pipeline),
+            resource_path: @resource_path
+          )
         end
       end
 
