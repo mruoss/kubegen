@@ -10,3 +10,5 @@ jobs:
     with:
       checkout: true
       warnings-as-errors: true
+    secrets:
+      token: ${{ secrets.GITHUB_TOKEN }}
