@@ -42,7 +42,7 @@ defmodule Kubegen.MixProject do
 
       # Dev deps
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
-      {:ex_doc, "~> 0.38", only: :dev, runtime: false},
+      {:ex_doc, "~> 0.39", only: :dev, runtime: false},
       {:dialyxir, "~> 1.4.0", only: [:dev, :test], runtime: false}
     ]
   end
