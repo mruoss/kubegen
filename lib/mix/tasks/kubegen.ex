@@ -50,7 +50,7 @@ defmodule Mix.Tasks.Kubegen do
   def run(args) do
     {parsed, argv, _errors} = OptionParser.parse(args, @cli_opts)
 
-    if length(argv) != 0, do: usage_and_exit()
+    if Enum.empty?(argv), do: usage_and_exit()
 
     cluster = String.to_atom(parsed[:cluster] || "default")
     config = Application.get_env(:kubegen, cluster)
