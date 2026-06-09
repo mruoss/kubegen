@@ -8,7 +8,4 @@
     ":prConcurrentLimit10",
     ':maintainLockFilesWeekly',
   ],
-  "constraints": {
-    "elixir": "v1.19.0"
-  },
 }
