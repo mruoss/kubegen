@@ -9,6 +9,6 @@
     ':maintainLockFilesWeekly',
   ],
   "constraints": {
-    "elixir": "v1.19.0"
+    "elixir": "v1.20.0"
   },
 }
