@@ -9,7 +9,7 @@
     ':maintainLockFilesWeekly',
   ],
   "constraints": {
-    "erlang": "29.0.1",
+    "erlang": "29.0.1.0",
     "elixir": "v1.20.0"
   },
 }
