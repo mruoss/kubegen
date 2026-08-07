@@ -13,6 +13,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- No new entries below this line! -->
 
+## 0.1.3
+
+## Chores
+
+- Several dependency upgrades
+
 ## 0.1.2
 
 ## Fixed
